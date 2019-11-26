@@ -13,21 +13,41 @@
  */
 function generateJadwalPiket(anggota, numOfDay) {
   const copyArray = arr => arr.map(el => el);
-  const getRandom = () => {
+  const getRandom = arr => {
     if (orangBelumPiket.length === 0) orangBelumPiket = copyArray(anggota);
-    const randomIndex = Math.floor(Math.random() * orangBelumPiket.length);
-    const namaOrang = orangBelumPiket[randomIndex];
+    let randomIndex = 0;
+    let namaOrang = '';
+    let udahSemua = true;
+    for (let orang of orangBelumPiket) {
+      if (!arr.includes(orang)) udahSemua = false;  
+    }
+    if (udahSemua) orangBelumPiket = copyArray(anggota); 
+    do {
+      randomIndex = Math.floor(Math.random() * orangBelumPiket.length);
+      namaOrang = orangBelumPiket[randomIndex];
+    } while (arr.includes(namaOrang));
     orangBelumPiket.splice(randomIndex, 1);
     return namaOrang;
   };
 
   let orangBelumPiket = copyArray(anggota);
+  let udahPiketCuciPiring = [];
+  let udahPiketSedotDebu = [];
+  let udahPiketBersihMeja = [];
+  const jumlahAnggota = anggota.length;
   const jadwalPiket = [];
   for (let i = 0; i < numOfDay; i++) {
-    const piketCuciPiring = [getRandom(), getRandom()];
-    const piketSedotDebut = [getRandom(), getRandom()];
-    const piketBersihMeja = [getRandom()];
-    jadwalPiket.push([piketCuciPiring, piketSedotDebut, piketBersihMeja]);
+    const piketCuciPiring = [getRandom(udahPiketCuciPiring), getRandom(udahPiketCuciPiring)];
+    const piketSedotDebu = [getRandom(udahPiketSedotDebu), getRandom(udahPiketSedotDebu)];
+    const piketBersihMeja = [getRandom(udahPiketBersihMeja)];
+    jadwalPiket.push([piketCuciPiring, piketSedotDebu, piketBersihMeja]);
+
+    udahPiketCuciPiring.push(...piketCuciPiring);
+    udahPiketSedotDebu.push(...piketSedotDebu);
+    udahPiketBersihMeja.push(...piketBersihMeja);
+    if (udahPiketCuciPiring.length === jumlahAnggota) udahPiketCuciPiring = [];
+    if (udahPiketSedotDebu.length === jumlahAnggota) udahPiketSedotDebu = [];
+    if (udahPiketBersihMeja.length === jumlahAnggota) udahPiketBersihMeja = [];
   }
   return jadwalPiket;
 }
