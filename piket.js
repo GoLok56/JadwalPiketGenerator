@@ -12,43 +12,91 @@
  * anggota yang bersihin meja.
  */
 function generateJadwalPiket(anggota, numOfDay) {
-  const copyArray = arr => arr.map(el => el);
-  const getRandom = arr => {
-    if (orangBelumPiket.length === 0) orangBelumPiket = copyArray(anggota);
-    let randomIndex = 0;
-    let namaOrang = '';
-    let udahSemua = true;
-    for (let orang of orangBelumPiket) {
-      if (!arr.includes(orang)) udahSemua = false;  
+    const copyArray = arrToCopy => arrToCopy.map(el => el);
+    const udahPiketMingguIni = namaOrang => !orangBelumPiket.mingguIni.includes(namaOrang);
+    const refillOrangBelumPiket = () => {
+        if (orangBelumPiket.mingguIni.length === 0)
+            orangBelumPiket.mingguIni = copyArray(anggota);
+    };
+
+    const containSubArray = (arrToCheck, subArray) => {
+        for (let element of subArray) {
+            if (arrToCheck.includes(element)) return true;
+        }
+        return false;
+    };
+
+    const getRandomCuciPiring = () => {
+        refillOrangBelumPiket();
+        
+        if (orangBelumPiket.cuciPiring.length === 0) orangBelumPiket.cuciPiring = copyArray(anggota);
+        if (!containSubArray(orangBelumPiket.mingguIni, orangBelumPiket.cuciPiring)) {
+            orangBelumPiket.cuciPiring = copyArray(anggota);
+        }
+
+        let randomIndex = 0;
+        let namaOrang = '';
+        do {
+            randomIndex = Math.floor(Math.random() * orangBelumPiket.cuciPiring.length);
+            namaOrang = orangBelumPiket.cuciPiring[randomIndex];
+        } while (udahPiketMingguIni(namaOrang));
+        orangBelumPiket.cuciPiring.splice(randomIndex, 1);
+        orangBelumPiket.mingguIni = orangBelumPiket.mingguIni.filter(nama => nama !== namaOrang);
+        return namaOrang;
     }
-    if (udahSemua) orangBelumPiket = copyArray(anggota); 
-    do {
-      randomIndex = Math.floor(Math.random() * orangBelumPiket.length);
-      namaOrang = orangBelumPiket[randomIndex];
-    } while (arr.includes(namaOrang));
-    orangBelumPiket.splice(randomIndex, 1);
-    return namaOrang;
-  };
 
-  let orangBelumPiket = copyArray(anggota);
-  let udahPiketCuciPiring = [];
-  let udahPiketSedotDebu = [];
-  let udahPiketBersihMeja = [];
-  const jumlahAnggota = anggota.length;
-  const jadwalPiket = [];
-  for (let i = 0; i < numOfDay; i++) {
-    const piketCuciPiring = [getRandom(udahPiketCuciPiring), getRandom(udahPiketCuciPiring)];
-    const piketSedotDebu = [getRandom(udahPiketSedotDebu), getRandom(udahPiketSedotDebu)];
-    const piketBersihMeja = [getRandom(udahPiketBersihMeja)];
-    jadwalPiket.push([piketCuciPiring, piketSedotDebu, piketBersihMeja]);
+    const getRandomSedotDebu = () => {
+        refillOrangBelumPiket();
+        
+        if (orangBelumPiket.sedotDebu.length === 0) orangBelumPiket.sedotDebu = copyArray(anggota);
+        if (!containSubArray(orangBelumPiket.mingguIni, orangBelumPiket.sedotDebu)) {
+            orangBelumPiket.sedotDebu = copyArray(anggota);
+        }
 
-    udahPiketCuciPiring.push(...piketCuciPiring);
-    udahPiketSedotDebu.push(...piketSedotDebu);
-    udahPiketBersihMeja.push(...piketBersihMeja);
-    if (udahPiketCuciPiring.length === jumlahAnggota) udahPiketCuciPiring = [];
-    if (udahPiketSedotDebu.length === jumlahAnggota) udahPiketSedotDebu = [];
-    if (udahPiketBersihMeja.length === jumlahAnggota) udahPiketBersihMeja = [];
-  }
-  return jadwalPiket;
+        let randomIndex = 0;
+        let namaOrang = '';
+        do {
+            randomIndex = Math.floor(Math.random() * orangBelumPiket.sedotDebu.length);
+            namaOrang = orangBelumPiket.sedotDebu[randomIndex];
+        } while (udahPiketMingguIni(namaOrang));
+        orangBelumPiket.sedotDebu.splice(randomIndex, 1);
+        orangBelumPiket.mingguIni = orangBelumPiket.mingguIni.filter(nama => nama !== namaOrang);
+        return namaOrang;
+    }
+
+    const getRandomBersihMeja = () => {
+        refillOrangBelumPiket();
+        
+        if (orangBelumPiket.bersihMeja.length === 0) orangBelumPiket.bersihMeja = copyArray(anggota);
+        if (!containSubArray(orangBelumPiket.mingguIni, orangBelumPiket.bersihMeja)) {
+            orangBelumPiket.bersihMeja = copyArray(anggota);
+        }
+
+        let randomIndex = 0;
+        let namaOrang = '';
+        do {
+            randomIndex = Math.floor(Math.random() * orangBelumPiket.bersihMeja.length);
+            namaOrang = orangBelumPiket.bersihMeja[randomIndex];
+        } while (udahPiketMingguIni(namaOrang));
+        orangBelumPiket.bersihMeja.splice(randomIndex, 1);
+        orangBelumPiket.mingguIni = orangBelumPiket.mingguIni.filter(nama => nama !== namaOrang);
+        return namaOrang;
+    }
+
+    let orangBelumPiket = {
+        mingguIni: copyArray(anggota),
+        cuciPiring: copyArray(anggota),
+        sedotDebu: copyArray(anggota),
+        bersihMeja: copyArray(anggota)
+    };
+
+    const jadwalPiket = [];
+    for (let i = 0; i < numOfDay; i++) {
+        const piketCuciPiring = [getRandomCuciPiring(), getRandomCuciPiring()];
+        const piketSedotDebu = [getRandomSedotDebu(), getRandomSedotDebu()];
+        const piketBersihMeja = [getRandomBersihMeja()];
+        jadwalPiket.push([piketCuciPiring, piketSedotDebu, piketBersihMeja]);
+    }
+    return jadwalPiket;
 }
-console.log(generateJadwalPiket(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'], 30));
+console.log(generateJadwalPiket(['a', 'b', 'c', 'd', 'e'], 10));
